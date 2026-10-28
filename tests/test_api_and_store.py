@@ -74,6 +74,18 @@ def test_grade_endpoint_returns_exact_schema(client, store):
     assert body["criteria"][0]["cited_chunk_ids"] == [chunk_id(store, "Q2 Cellular respiration > Location")]
 
 
+def test_off_topic_answer_is_flagged_as_weak_match_with_real_embeddings(client):
+    res = client.post("/grade", json={**GRADE_REQUEST, "answer": "My favourite football team won yesterday."})
+    body = res.json()
+    assert body["needs_human_review"] and "weak rubric match" in body["reasons"]
+
+
+def test_retrieval_returns_similarity_scores(store):
+    hits = store.retrieve("biology-quiz-1", "It happens in the mitochondria", "rubric", k=4)
+    sims = [c.similarity for c in hits]
+    assert all(s is not None and -1 <= s <= 1 for s in sims)
+
+
 def test_chunks_endpoint_resolves_cited_ids(client, store):
     chunks = {c["id"]: c for c in client.get("/rubrics/biology-quiz-1/chunks").json()}
     loc = chunks[chunk_id(store, "Q2 Cellular respiration > Location")]

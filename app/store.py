@@ -73,6 +73,9 @@ class Store:
         if available == 0:
             return []
         res = self.collection.query(query_texts=[query], n_results=min(k, available), where=where)
-        chunks = [_from_result(d, m) for d, m in zip(res["documents"][0], res["metadatas"][0])]
+        chunks = [  # the collection uses cosine distance, so similarity = 1 - distance
+            _from_result(d, m).model_copy(update={"similarity": round(1 - dist, 4)})
+            for d, m, dist in zip(res["documents"][0], res["metadatas"][0], res["distances"][0])
+        ]
         # Present chunks in document order so the LLM sees the rubric as written.
         return sorted(chunks, key=lambda c: (c.source, c.start_line))

@@ -16,12 +16,16 @@ NOTES = [Chunk(id="N5-7", text="Photosynthesis makes glucose.", doc_type="notes"
 
 
 class FakeStore:
-    def __init__(self, rubric=RUBRIC, notes=NOTES):
+    def __init__(self, rubric=RUBRIC, notes=NOTES, answer_similarity=0.6):
         self.rubric, self.notes, self.calls = rubric, notes, []
+        self.answer_similarity = answer_similarity
 
     def retrieve(self, rubric_collection, query, doc_type, k):
         self.calls.append((doc_type, k))
-        return self.rubric if doc_type == "rubric" else self.notes
+        chunks = self.rubric if doc_type == "rubric" else self.notes
+        if k == 1 and chunks:  # the answer-only similarity check
+            return [chunks[0].model_copy(update={"similarity": self.answer_similarity})]
+        return chunks
 
     def get_chunks(self, rubric_collection, doc_type):
         return self.all_rubric if doc_type == "rubric" else self.notes
@@ -92,7 +96,7 @@ def test_retrieves_top_4_rubric_chunks():
 def test_invalid_json_is_retried_with_error_fed_back():
     llm = FakeLLM("not json at all", result())
     res = run(llm)
-    assert res.score == 4 and len(llm.calls) == 2
+    assert res.score == 4 and len(llm.calls) == 3  # run 1: bad + retry, run 2: ok
     retry = llm.calls[1]
     assert retry[2] == {"role": "assistant", "content": "not json at all"}  # model sees its bad output
     assert retry[3]["role"] == "user" and "did not match the required JSON schema" in retry[3]["content"]
@@ -101,7 +105,7 @@ def test_invalid_json_is_retried_with_error_fed_back():
 def test_schema_violation_is_retried_with_field_level_error():
     llm = FakeLLM(result(score=9, max_score=5), {"score": 4}, result())
     res = run(llm)
-    assert res.score == 4 and len(llm.calls) == 3
+    assert res.score == 4 and len(llm.calls) == 4  # run 1: 2 retries, run 2: ok
     assert "cannot be greater than max_score" in llm.calls[1][3]["content"]
     assert "criteria" in llm.calls[2][-1]["content"]  # missing fields are named in the feedback
 
@@ -115,7 +119,7 @@ def test_gives_up_after_two_retries_with_clear_error():
     llm = FakeLLM("bad", "still bad", "bad again", result())
     with pytest.raises(grader.LLMOutputError, match="invalid output 3 times"):
         run(llm)
-    assert len(llm.calls) == 3  # 1 attempt + 2 retries, never a 4th
+    assert len(llm.calls) == 3  # 1 attempt + 2 retries, never a 4th (and no second run)
 
 
 # --- citation checks -----------------------------------------------------------------------------
@@ -169,6 +173,78 @@ def test_all_criteria_retrieved_is_not_flagged():
 def test_llm_flag_for_review_is_kept():
     res = run(FakeLLM(result(needs_human_review=True, reasons=["Answer tries to instruct the grader"])))
     assert res.needs_human_review and res.reasons == ["Answer tries to instruct the grader"]
+
+
+# --- safeguard 1: grade twice ------------------------------------------------------------------
+
+def test_two_runs_differing_by_more_than_1_are_flagged():
+    llm = FakeLLM(result(score=4), result(score=2))
+    res = run(llm)
+    assert len(llm.calls) == 2  # the answer was graded twice
+    assert res.needs_human_review and "inconsistent scores" in res.reasons
+    assert res.score == 4  # the first grade is returned; the second is only a check
+
+
+@pytest.mark.parametrize("second", [4, 3, 5])
+def test_two_runs_within_1_point_are_not_flagged(second):
+    res = run(FakeLLM(result(score=4), result(score=second)))
+    assert "inconsistent scores" not in res.reasons and res.needs_human_review is False
+
+
+def test_disagreement_threshold_is_configurable(monkeypatch):
+    monkeypatch.setattr(grader.config, "MAX_SCORE_DISAGREEMENT", 0)
+    res = run(FakeLLM(result(score=4), result(score=3)))
+    assert "inconsistent scores" in res.reasons
+
+
+# --- safeguard 2: weak rubric match --------------------------------------------------------------
+
+def test_weak_rubric_match_is_flagged():
+    res = run(FakeLLM(result()), FakeStore(answer_similarity=0.10))
+    assert res.needs_human_review and "weak rubric match" in res.reasons
+
+
+def test_strong_rubric_match_is_not_flagged():
+    res = run(FakeLLM(result()), FakeStore(answer_similarity=0.60))
+    assert "weak rubric match" not in res.reasons and res.needs_human_review is False
+
+
+def test_similarity_threshold_is_configurable(monkeypatch):
+    monkeypatch.setattr(grader.config, "MIN_RUBRIC_SIMILARITY", 0.7)
+    assert "weak rubric match" in run(FakeLLM(result()), FakeStore(answer_similarity=0.6)).reasons
+
+
+def test_similarity_is_checked_on_the_answer_alone():
+    store = FakeStore()
+    llm = FakeLLM(result())
+    grader.grade(store, "quiz", "Explain photosynthesis", "my answer", llm=llm)
+    assert ("rubric", 1) in store.calls  # separate k=1 lookup, see FakeStore.retrieve
+
+
+def test_both_safeguards_can_fire_together():
+    res = run(FakeLLM(result(score=5), result(score=0)), FakeStore(answer_similarity=0.0))
+    assert {"inconsistent scores", "weak rubric match"} <= set(res.reasons)
+
+
+# --- safeguards 3 and 4: audience prompt, privacy-safe logging ----------------------------------
+
+def test_system_prompt_targets_children_8_to_14():
+    assert "aged 8-14" in grader.SYSTEM_PROMPT and "encouraging" in grader.SYSTEM_PROMPT
+
+
+def test_logs_never_contain_student_text(caplog):
+    caplog.set_level("INFO", logger="rubricrag")
+    secret_answer, secret_question = "Plants eat sunlight, says Priya from 5B", "Q about photosynthesis"
+    grader.grade(FakeStore(), "quiz", secret_question, secret_answer, llm=FakeLLM(result()))
+    assert "latency_ms=" in caplog.text and "scores=4,4" in caplog.text and "request_id=" in caplog.text
+    assert secret_answer not in caplog.text and "Priya" not in caplog.text and secret_question not in caplog.text
+
+
+def test_failure_logs_never_contain_student_text(caplog):
+    caplog.set_level("INFO", logger="rubricrag")
+    with pytest.raises(grader.LLMOutputError):
+        grader.grade(FakeStore(), "quiz", "q", "Secret answer from Aarav", llm=FakeLLM("not json"))
+    assert "LLMOutputError" in caplog.text and "Aarav" not in caplog.text
 
 
 # --- errors --------------------------------------------------------------------------------------

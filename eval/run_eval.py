@@ -43,7 +43,7 @@ def main():
     rubric_chunks = store.get_chunks(RUBRIC_ID, "rubric")
     cases = load_cases()
 
-    rows, recalls = [], []
+    rows, recalls, feedback_samples = [], [], []
     abs_errors, within1, max_ok, precisions, removed, reviews = [], 0, 0, [], 0, 0
     for case in cases:
         # The question's criteria: every rubric chunk whose criterion name starts with e.g. "Q1".
@@ -65,7 +65,9 @@ def main():
                 precisions.append(len([c for c in cited if c in expected]) / len(cited))
             removed += sum("rejected citations" in r for r in res.reasons)
             reviews += res.needs_human_review
-            row.update(got=res.score, max=res.max_score, review="yes" if res.needs_human_review else "")
+            row.update(got=res.score, max=res.max_score,
+                       review="; ".join(r if len(r) < 45 else r[:42] + "..." for r in res.reasons))
+            feedback_samples.append((case["id"], res.overall_feedback))
         rows.append(row)
 
     n = len(cases)
@@ -91,6 +93,8 @@ def main():
             line += f" {r['got']} | {r['max']} | {r['review']} |"
         lines.append(line)
 
+    for cid, fb in feedback_samples[:3]:
+        print(f"[{cid}] {fb}")
     report = "# Evaluation results\n\n" + "\n".join(f"- {s}" for s in summary) + "\n\n" + "\n".join(lines) + "\n"
     print(report)
     (ROOT / "eval" / "results.md").write_text(report)

@@ -1,4 +1,5 @@
 """FastAPI backend. Run with: uvicorn app.main:app --reload"""
+import logging
 from functools import lru_cache
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
@@ -7,6 +8,8 @@ from app import grader
 from app.loaders import read_document
 from app.schemas import Chunk, GradeRequest, GradeResponse, IngestRequest, IngestResponse
 from app.store import Store
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 app = FastAPI(title="RubricRAG", description="Rubric-grounded feedback assistant")
 

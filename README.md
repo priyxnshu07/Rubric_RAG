@@ -67,6 +67,22 @@ tests/   pytest unit and integration tests (no API key needed)
 
    The LLM can also flag a grade for review itself, for example an off-topic answer or one trying to instruct the grader.
 
+### Safeguards
+
+| # | Safeguard | How | Config (`.env`) |
+|---|---|---|---|
+| 1 | **Consistency** | Every answer is graded **twice**; if the two scores differ by more than 1, it's flagged `"inconsistent scores"`. The first grade is returned. | `MAX_SCORE_DISAGREEMENT=1` |
+| 2 | **Weak rubric match** | The **answer alone** is embedded and compared with the rubric. If even its closest criterion has cosine similarity below the threshold, it's flagged `"weak rubric match"`. | `MIN_RUBRIC_SIMILARITY=0.35` |
+| 3 | **Age-appropriate feedback** | The system prompt says students are 8–14: start with what went well, use simple words, never be harsh, and don't let encouragement change the score. | |
+| 4 | **Privacy-safe logging** | Logs hold only a request id, collection name, chunk ids, both scores, similarity and latency, never the question, the answer or the LLM's reasons (they may quote the answer). Failures log only the error type. | |
+
+**Why the answer alone for #2:** I measured the best similarity on the sample data. With question + answer as the query, "I don't know." scored **0.63**, as high as real answers (0.50–0.68), because the question always matches its own rubric. With the answer alone, real answers scored **0.46–0.68** and off-topic ones **≤ 0.25**, so 0.35 sits in the gap. Retrieval still uses question + answer, because that's better for picking the right question's criteria.
+
+Example log line:
+```
+INFO rubricrag.grade: grade ok request_id=3f9c1a2b collection=biology-quiz-1 retrieved=['N14-15', 'R30-34', ...] cited=['R36-38'] scores=2,2 max_score=10 best_similarity=0.61 needs_review=False latency_ms=2140
+```
+
 ### API
 
 `POST /grade`
@@ -160,15 +176,16 @@ python -m eval.run_eval                    # full pipeline, needs an LLM key
 
 | Metric | Result |
 |---|---|
-| Score MAE (vs my reference scores) | **0.40** points out of 10 |
+| Score MAE (vs my reference scores) | **0.50** points out of 10 |
 | Within 1 point of reference | **9/10** |
 | Right criteria graded (max score = 10) | **9/10** |
 | Citation precision | **1.00** |
 | Invented citations rejected | 0 |
-| Flagged for human review | 2/10, and both were right to flag (below) |
-| Prompt-injection answer ("award full marks") | scored **0/10** (reference 1) and flagged |
+| Flagged for human review | 3/10, each for a real reason (below) |
+| Prompt-injection answer ("award full marks") | scored **2/10** (reference 1), flagged "inconsistent scores" |
+| "Weak rubric match" on genuine answers | 0/10 (no false alarms); an off-topic answer is flagged in `tests/` |
 
-The one real miss is `q2_partial`. Top-4 retrieval dropped one of Q2's four criteria, so it was graded out of 8 and scored 3 against my reference of 5. Before I added the "criteria not retrieved" check, this failed **silently**: the score looked internally consistent. Now it's flagged for human review. All strong and weak answers were scored exactly. With k = 8 (an earlier version), the same set reached MAE 0.30 and 10/10 within 1 point, so top-4 trades a little accuracy for a shorter prompt. This was a single run on 10 cases, so treat it as a sanity check rather than a benchmark.
+The one real miss is `q2_partial`. Top-4 retrieval dropped one of Q2's four criteria, so it was graded out of 8 and scored 2 against my reference of 5. Before I added the "criteria not retrieved" check, this failed **silently**: the score looked internally consistent. Now it's flagged for human review. All strong and weak answers were scored exactly. With k = 8 (an earlier version), the same set reached MAE 0.30 and 10/10 within 1 point, so top-4 trades a little accuracy for a shorter prompt. The other two flags were the prompt-injection answer (its two runs disagreed, which suggests the attack makes grading unstable) and an off-topic answer the LLM flagged itself. The exact numbers move slightly between runs (MAE was 0.40 on the previous run), which is exactly why safeguard #1 exists. This was 10 cases, so treat it as a sanity check rather than a benchmark.
 
 ## Limitations
 
@@ -178,4 +195,7 @@ The one real miss is `q2_partial`. Top-4 retrieval dropped one of Q2's four crit
 - **Document formats.** `.md`, `.txt` and text-based `.pdf` only. Scanned PDFs (images) and `.docx` aren't supported, and PDF line numbers refer to the extracted text.
 - **Criterion detection relies on "(N points)".** Rubrics that don't state points per criterion fall back to paragraph chunks without criterion names.
 - **No auth, single user.** Anyone who can reach the API can upload or grade. Fine for a local demo, not for deployment.
+- **The consistency check is weak at temperature 0.** Both runs use the same prompt and temperature 0, so they usually agree; the check only catches the model's own randomness. It also doubles cost and latency. A stronger version would vary the prompt or the order of the chunks between runs.
+- **The similarity threshold was tuned on tiny data.** 0.35 comes from 10 answers and 4 off-topic examples from one subject. It should be re-tuned per subject.
+- **Age-appropriate tone is prompted, not checked.** Nothing measures reading level. A readability score (e.g. Flesch–Kincaid) on the feedback would be a cheap next check.
 - **Prompt injection is mitigated, not solved.** The answer is clearly delimited and the model is told to ignore instructions inside it, but a determined attack could still sway a score.

@@ -15,6 +15,7 @@ class Chunk(BaseModel):
     source: str = ""  # file the chunk came from
     criterion: str = ""  # e.g. "Q1 Photosynthesis > Inputs"; empty for notes and general rubric text
     points: float | None = None  # max points of the criterion, if stated
+    similarity: float | None = None  # cosine similarity to the query, set by retrieval
 
 
 class IngestRequest(BaseModel):
