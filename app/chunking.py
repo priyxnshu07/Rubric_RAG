@@ -62,7 +62,8 @@ def chunk_rubric(text: str, source: str = "rubric") -> list[Chunk]:
         if points:  # a new criterion starts here
             flush()
             name = _clean(line[:points.start()])
-            block = {"start": line_no, "end": line_no, "lines": [line], "points": float(points.group(1)),
+            block = {"start": line_no, "end": line_no, "lines": [re.sub(r"^#{1,6}\s+", "", line)],
+                     "points": float(points.group(1)),
                      "criterion": f"{section} > {name}" if section else name}
         elif heading:  # a section heading: closes the current chunk, labels the next ones
             flush()

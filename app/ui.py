@@ -11,7 +11,7 @@ API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.set_page_config(page_title="RubricRAG", layout="wide")
 st.title("RubricRAG")
-st.caption("Rubric-grounded feedback: every score cites the rubric lines it is based on.")
+st.caption("Rubric-grounded feedback: every judgement cites the rubric criteria it is based on.")
 
 
 def api(method: str, path: str, **kwargs):
@@ -26,9 +26,50 @@ def api(method: str, path: str, **kwargs):
     return r.json()
 
 
-teacher, student = st.tabs(["1. Teacher: upload rubric", "2. Grade an answer"])
+DEFAULT_QUESTION = "Answer the task described in the rubric."
 
-with teacher:
+grade_tab, teacher_tab = st.tabs(["Grade an answer", "Teacher: upload a rubric"])
+
+with grade_tab:
+    rubrics = api("GET", "/rubrics")
+    if not rubrics:
+        st.info("No rubrics yet. Upload one in the Teacher tab, or run: python -m app.ingest data/<folder>")
+    else:
+        chosen = st.selectbox("Rubric", rubrics)
+        question = st.text_input("Question", value=DEFAULT_QUESTION)
+        answer = st.text_area("Student answer", height=200, placeholder="Paste the student's answer here")
+        if st.button("Grade", type="primary", disabled=not (question.strip() and answer.strip())):
+            with st.spinner("Finding the matching rubric criteria and grading (twice, for consistency)..."):
+                res = api("POST", "/grade", json={"rubric_collection": chosen, "question": question,
+                                                  "answer": answer})
+                chunks = {c["id"]: c for c in api("GET", f"/rubrics/{chosen}/chunks")}
+
+            if res["needs_human_review"]:
+                st.error("### ⚠️ Needs teacher review\n" + "\n".join(f"- {r}" for r in res["reasons"]))
+            else:
+                st.success("No review flags: the checks found nothing unusual.")
+
+            st.metric("Score", f"{res['score']} / {res['max_score']}")
+            st.write(res["overall_feedback"])
+
+            st.subheader("Feedback per criterion")
+            for c in res["criteria"]:
+                with st.container(border=True):
+                    st.markdown(f"**{'✅' if c['met'] else '❌'} {c['name']}**")
+                    st.write(c["feedback"])
+                    cols = st.columns(max(len(c["cited_chunk_ids"]), 1))
+                    for col, cid in zip(cols, c["cited_chunk_ids"]):
+                        ch = chunks.get(cid)
+                        if not ch:
+                            continue
+                        with col.popover(f"📄 Rubric {cid}", help="Show the rubric text this is based on"):
+                            st.caption(f"{ch['criterion'] or 'General'} · {ch['source']}, "
+                                       f"lines {ch['start_line']}-{ch['end_line']}")
+                            st.text(ch["text"])
+                    if not c["cited_chunk_ids"]:
+                        st.caption("No rubric citation for this criterion.")
+
+with teacher_tab:
     rubric_id = st.text_input("Rubric name", placeholder="e.g. photosynthesis-q1")
     rubric_file = st.file_uploader("Rubric (.md, .txt or .pdf)", type=["md", "txt", "pdf"])
     notes_file = st.file_uploader("Course notes (optional, .md, .txt or .pdf)", type=["md", "txt", "pdf"])
@@ -39,31 +80,3 @@ with teacher:
         res = api("POST", "/ingest/files", data={"rubric_id": rubric_id}, files=files)
         st.success(f"Stored '{res['rubric_id']}': {res['rubric_chunks']} rubric chunks, "
                    f"{res['notes_chunks']} notes chunks.")
-
-with student:
-    rubrics = api("GET", "/rubrics")
-    if not rubrics:
-        st.info("No rubrics yet. Upload one in the Teacher tab.")
-    else:
-        chosen = st.selectbox("Rubric", rubrics)
-        question = st.text_input("Question")
-        answer = st.text_area("Student answer", height=200)
-        if st.button("Grade", type="primary", disabled=not (question.strip() and answer.strip())):
-            with st.spinner("Retrieving rubric chunks and grading..."):
-                res = api("POST", "/grade", json={"rubric_collection": chosen, "question": question,
-                                                  "answer": answer})
-                chunks = {c["id"]: c for c in api("GET", f"/rubrics/{chosen}/chunks")}
-
-            st.metric("Score", f"{res['score']} / {res['max_score']}")
-            if res["needs_human_review"]:
-                st.warning("Needs human review:\n\n" + "\n".join(f"- {r}" for r in res["reasons"]))
-            st.write(res["overall_feedback"])
-            for c in res["criteria"]:
-                with st.expander(f"{'✅' if c['met'] else '❌'} {c['name']}", expanded=True):
-                    st.write(c["feedback"])
-                    for cid in c["cited_chunk_ids"]:
-                        ch = chunks.get(cid)
-                        if ch:
-                            st.caption(f"[{cid}] {ch['criterion'] or 'General'} "
-                                       f"({ch['source']}, lines {ch['start_line']}-{ch['end_line']})")
-                            st.text(ch["text"])

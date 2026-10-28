@@ -69,6 +69,16 @@ Respond with JSON only, in exactly this shape:
  "needs_human_review": <true|false>, "reasons": ["<why review is needed>"]}"""
 
 
+def groq_failed_generation(e: Exception) -> str | None:
+    """Groq's JSON mode rejects malformed output with a 400 (code json_validate_failed). Return the rejected
+    text so our own retry loop can feed the error back, instead of failing the whole request."""
+    body = getattr(e, "body", None)
+    err = body.get("error", body) if isinstance(body, dict) else {}
+    if isinstance(err, dict) and err.get("code") == "json_validate_failed":
+        return err.get("failed_generation") or ""
+    return None
+
+
 def groq_llm(messages: list[dict]) -> str:
     from groq import Groq  # imported lazily so tests and ingestion work without the package configured
 
@@ -83,6 +93,9 @@ def groq_llm(messages: list[dict]) -> str:
             response_format={"type": "json_object"},
         )
     except Exception as e:  # bad key, unknown model, rate limit... surface the reason
+        failed = groq_failed_generation(e)
+        if failed is not None:
+            return failed  # invalid JSON: let call_llm() retry with the validation error
         raise LLMProviderError(f"Groq API error: {e}") from e
     return resp.choices[0].message.content
 
@@ -199,6 +212,16 @@ def postprocess(result: GradeResponse, rubric: list[Chunk], notes: list[Chunk],
     if points and all(p is not None for p in points) and sum(points) != result.max_score:
         reasons.append(f"max_score is {result.max_score} but the cited rubric criteria add up to {sum(points):g}")
 
+    # "met" means full points for that criterion, so the total can't be lower than the met criteria's points.
+    met_points = 0.0
+    for cr in criteria:
+        rubric_pts = [by_id[cid].points for cid in cr.cited_chunk_ids
+                      if by_id[cid].doc_type == "rubric" and by_id[cid].points is not None]
+        if cr.met and rubric_pts:
+            met_points += rubric_pts[0]
+    if met_points > result.score:
+        reasons.append(f"score {result.score} is lower than the {met_points:g} points of criteria marked as met")
+
     # Top-k retrieval can miss part of a question. If a cited question has criteria that were never
     # retrieved, the LLM graded it out of fewer points than it is worth.
     if all_rubric:
@@ -227,7 +250,7 @@ def grade(store, rubric_collection: str, question: str, answer: str, llm: LLM | 
     started = time.perf_counter()
     try:
         query = f"{question}\n{answer}"
-        rubric = store.retrieve(rubric_collection, query, "rubric", config.TOP_K_RUBRIC)
+        rubric = store.retrieve(rubric_collection, query, "rubric", config.TOP_K_RUBRIC, criteria_only=True)
         if not rubric:
             raise LookupError(f"Rubric collection '{rubric_collection}' not found. "
                               f"Ingest it first: python -m app.ingest data/<folder>")
@@ -244,7 +267,7 @@ def grade(store, rubric_collection: str, question: str, answer: str, llm: LLM | 
 
         # Safeguard 2: does the ANSWER itself match the rubric? (The question is left out on purpose:
         # it always matches its own rubric, so "I don't know." would otherwise look like a strong match.)
-        best = store.retrieve(rubric_collection, answer, "rubric", 1)[0].similarity
+        best = store.retrieve(rubric_collection, answer, "rubric", 1, criteria_only=True)[0].similarity
         if best is not None and best < config.MIN_RUBRIC_SIMILARITY:
             result = _flag(result, "weak rubric match")
     except Exception as e:

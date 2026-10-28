@@ -1,0 +1,1279 @@
+{
+  "run_at": "2026-10-28T21:53:07+00:00",
+  "models": {
+    "large": {
+      "model": "openai/gpt-oss-120b",
+      "usd_per_m_input": 0.15,
+      "usd_per_m_output": 0.6,
+      "results": [
+        {
+          "id": "ps_01",
+          "score": 8,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a wonderful job with every part of the speech – the hook, main idea, reasons, and ending are all clear and persuasive. Keep practicing your delivery and you’ll be an even more confident speaker!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Great job starting with a question that catches attention!",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly stated the main idea early and stayed focused on it.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two strong reasons and backed each with a personal example or detail.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": true,
+              "feedback": "Your ending nicely summed up the point and asked classmates to act.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 3.34,
+          "rate_limit_wait_s": 0.0,
+          "llm_calls": 2,
+          "input_tokens": 2162,
+          "output_tokens": 1118,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_02",
+          "score": 8,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You wrote a fantastic short speech with a strong hook, clear message, good reasons, and a call to action. Next time, you could add a quick summary sentence before the call to action to make the ending even stronger.",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Great job starting with a vivid picture that catches attention!",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Your main idea is clear and stated early – well done!",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two strong reasons and backed each with a fact or personal example.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": true,
+              "feedback": "Your ending includes a clear call to action, which is perfect!",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 2.98,
+          "rate_limit_wait_s": 0.0,
+          "llm_calls": 2,
+          "input_tokens": 2154,
+          "output_tokens": 1235,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_03",
+          "score": 8,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You wrote a wonderful speech with a strong hook, clear message, good reasons, and a call to action. Keep practicing your speaking voice and eye contact for an even better delivery!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Great job starting with a short story that catches attention!",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly said why everyone should learn to swim early on, and you stayed on topic.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two reasons (safety and exercise) and backed them with personal examples.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": true,
+              "feedback": "Your ending repeats the main idea and asks the audience to act, which is perfect!",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 3.0,
+          "rate_limit_wait_s": 0.0,
+          "llm_calls": 2,
+          "input_tokens": 2134,
+          "output_tokens": 1192,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_04",
+          "score": 5,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did well stating why more PE is important and keeping your speech focused. Next time, start with a catchy hook, give clear examples for each reason, and finish with a short summary and a call to action. Keep practicing!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You started with a plain sentence. Try to begin with a question, surprising fact, or short story to grab attention.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Great job stating your main idea early and staying on topic!",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You gave two reasons, but add a short example or personal story for each to make them stronger.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Add a quick summary of your main point and ask your classmates to think about joining more PE.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 4.36,
+          "rate_limit_wait_s": 0.0,
+          "llm_calls": 2,
+          "input_tokens": 2046,
+          "output_tokens": 1765,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_05",
+          "score": 7,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a wonderful job with a catchy start, a clear idea, and good reasons. Next time, finish with a quick recap and a call to action so your audience knows what to do next!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Great job starting with a question that catches attention!",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly said you want a games club and kept talking about it.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two reasons and added examples like your friend Riya and the games you could play.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Try ending with a short summary and ask your classmates to join the club or think about it.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 5.44,
+          "rate_limit_wait_s": 26.1,
+          "llm_calls": 2,
+          "input_tokens": 2640,
+          "output_tokens": 1450,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_06",
+          "score": 7,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a wonderful job explaining why dogs are great pets and ending with a helpful suggestion. Next time, start with a fun hook to catch everyone's interest right away!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "Your speech starts with a clear statement, but try to begin with a question, surprising fact, or short story to grab attention.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Great job stating your main idea early – that dogs are the best pets – and staying focused on it.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two good reasons and added a personal example about Bruno, which makes your points stronger.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": true,
+              "feedback": "Your ending nicely repeats your message and asks the class to visit a shelter, which is a clear call to action.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 2.87,
+          "rate_limit_wait_s": 0.0,
+          "llm_calls": 2,
+          "input_tokens": 3388,
+          "output_tokens": 1256,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_07",
+          "score": 5,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a good job stating why saving water matters and keeping your message clear. Next time, start with a catchy hook, give a clear example for each reason, and finish by asking your classmates to do something. You’re on the right track!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "Your opening says \"Hello everyone,\" which is okay, but try to start with a question or surprising fact to grab attention, like \"Did you know we waste water every time we brush our teeth?\"",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Great job stating the main idea early: saving water. Keep it clear and simple like you did!",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You gave a reason about leaving the tap running and mentioned why water matters, but add another example or fact for each reason to make them stronger.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "You ended with a summary, which is good. Add a call to action, such as \"Let's all turn off the tap while brushing!\"",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 4.08,
+          "rate_limit_wait_s": 6.1,
+          "llm_calls": 2,
+          "input_tokens": 2086,
+          "output_tokens": 1598,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_08",
+          "score": 2,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "Great job sharing what you love about football! Next, add a catchy opening, a clear main point, more reasons with examples, and finish with a short summary and a call to action. You’re on the right track!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Your first sentence is a simple statement. Try starting with a question or a surprising fact to grab attention.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "It isn’t clear what you want the class to think or do. State your main idea early, like “Football teaches teamwork and health.”",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave one reason (“Football is fun”) and a small example, but you need at least two reasons with examples.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "The speech ends with a personal wish. Add a short summary and ask the class to try playing football or support the sport.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 4.43,
+          "rate_limit_wait_s": 12.0,
+          "llm_calls": 2,
+          "input_tokens": 2032,
+          "output_tokens": 1878,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_09",
+          "score": 3,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "Great job stating your main idea! Next time, start with a hook, give an example for each reason, and end with a clear summary and call to action. You’re on the right track!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "Try starting with a question, a surprising fact, or a short story to grab attention.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly said that homework should be banned, which is good!",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You gave reasons, but add a real example or a personal story to make them stronger.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Finish with a short summary and ask your classmates to think or act on your idea.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 4.59,
+          "rate_limit_wait_s": 12.3,
+          "llm_calls": 2,
+          "input_tokens": 1970,
+          "output_tokens": 1346,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_10",
+          "score": 1,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "Great start with a clear topic! Next, try a catchy hook, a clear message, reasons with examples, and a strong ending that asks your friends to act. You can do it!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "You started with a simple opening, but try a question or fun fact to grab attention!",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "Your main idea isn’t clear yet – tell us exactly what you want the class to think or do about trees.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "Add at least two reasons why trees are important, and give a short example or fact for each.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Finish with a short summary and ask the class to do something, like planting a tree or protecting them.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 4.24,
+          "rate_limit_wait_s": 9.7,
+          "llm_calls": 2,
+          "input_tokens": 1956,
+          "output_tokens": 1333,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_11",
+          "score": 0,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "off-topic answer",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You tried to write something, which is good practice. Next time, choose a topic you care about, start with a hook, give reasons and examples, and finish with a clear ending. Keep practicing!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "Your speech does not start with a hook that grabs attention.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "There is no clear main idea or opinion stated near the start.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You did not give any reasons or examples to support a persuasive point.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "The script ends without a summary or call to action.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 2.83,
+          "rate_limit_wait_s": 11.0,
+          "llm_calls": 2,
+          "input_tokens": 2006,
+          "output_tokens": 1050,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_12",
+          "score": 0,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "off-topic answer, no speech script provided",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You asked for marks, but the task is to write a short persuasive speech. Start with a hook, state a clear main message, give reasons with examples, and end with a strong conclusion. You can create a great speech by adding those parts!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "Your answer does not start with a hook. Try beginning with a question, a surprising fact, or a short story to grab attention.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "There is no clear main idea stated near the start. Think of one simple sentence that tells the audience what you want them to think.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You did not give any reasons or examples to support your idea. Include at least two reasons, each with a fact, example, or personal story.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "The script has no ending that summarizes the message or calls the audience to act. Finish with a short recap and a call to think or do something.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 3.32,
+          "rate_limit_wait_s": 9.2,
+          "llm_calls": 2,
+          "input_tokens": 1972,
+          "output_tokens": 1335,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        }
+      ]
+    },
+    "small": {
+      "model": "openai/gpt-oss-20b",
+      "usd_per_m_input": 0.075,
+      "usd_per_m_output": 0.3,
+      "results": [
+        {
+          "id": "ps_01",
+          "score": 8,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "'Opening hook': not backed by any retrieved rubric chunk",
+            "'Clear main message': not backed by any retrieved rubric chunk",
+            "max_score is 8 but the cited rubric criteria add up to 4",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a fantastic job writing a short, persuasive speech. Keep practicing speaking out loud to make it even smoother. Great work!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Great job starting with a question that grabs attention!",
+              "cited_chunk_ids": [
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly stated the main idea early on—every student should visit the library weekly. Keep it simple and direct!",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two solid reasons with personal examples. That makes your argument convincing!",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": true,
+              "feedback": "Your ending includes a summary and a clear call to action. Well done!",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 2.68,
+          "rate_limit_wait_s": 0.0,
+          "llm_calls": 2,
+          "input_tokens": 2162,
+          "output_tokens": 1374,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_02",
+          "score": 7,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a fantastic job with a clear hook, message, and solid reasons. Keep adding a quick summary at the end to finish strong. Great work, keep it up!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Great job starting with a vivid picture that caught our attention! Keep using short, exciting ideas to hook your listeners right away.",
+              "cited_chunk_ids": [
+                "R8-11",
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly stated your main idea early on, so everyone knows what you want them to think. Keep your message simple and repeat it if you can.",
+              "cited_chunk_ids": [
+                "R13-16",
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two strong reasons and backed them up with facts and a personal story. Try adding one more example next time to make it even stronger!",
+              "cited_chunk_ids": [
+                "R18-21",
+                "N15-16"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "You ended with a call to action, which is good! Adding a quick summary of your main point before the call to action would make it even stronger.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 7.22,
+          "rate_limit_wait_s": 20.0,
+          "llm_calls": 3,
+          "input_tokens": 2208,
+          "output_tokens": 3001,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_03",
+          "score": 8,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a fantastic job writing a persuasive speech! Keep practicing your opening and ending to make them even stronger.",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "Great job starting with a story that caught attention! Next, keep the hook short and clear to grab even more interest.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly stated why everyone should learn to swim early on. Next, try to keep the message simple so everyone remembers it.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two solid reasons with examples. Next, add a quick fact or statistic to make it even stronger.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": true,
+              "feedback": "You ended with a clear call to action. Next, maybe add a quick recap of the main point to reinforce it.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 2.91,
+          "rate_limit_wait_s": 21.7,
+          "llm_calls": 2,
+          "input_tokens": 2134,
+          "output_tokens": 1875,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_04",
+          "score": 6,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "'Opening hook': not backed by any retrieved rubric chunk",
+            "'Clear main message': not backed by any retrieved rubric chunk",
+            "'Reasons and examples': not backed by any retrieved rubric chunk",
+            "'Strong ending': not backed by any retrieved rubric chunk",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a good job explaining why more PE is important. Next, add a hook at the start and end with a clear call to action. Keep practicing and your speech will shine!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You started with a plain statement. Try a question or a surprising fact to grab attention.",
+              "cited_chunk_ids": [
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Great job stating your main idea early!",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two reasons and examples. Keep adding more details to make it stronger.",
+              "cited_chunk_ids": [
+                "N5-6",
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Finish with a quick summary and a call to action, not just a thank you.",
+              "cited_chunk_ids": [
+                "N25"
+              ]
+            }
+          ],
+          "latency_s": 4.09,
+          "rate_limit_wait_s": 24.1,
+          "llm_calls": 2,
+          "input_tokens": 2046,
+          "output_tokens": 2115,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_05",
+          "score": 6,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "Great job starting with a question that grabs attention! You clearly said you want a games club and gave good examples. Next, try ending with a short summary and a call to action, like asking classmates to join or vote for the club.",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": true,
+              "feedback": "You started with a great question that grabs attention!",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "You clearly said the school should have a games club early on.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave reasons like fun and making friends, and used a friend’s example.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Try ending with a short summary and a call to action, like asking classmates to join the club.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 4.41,
+          "rate_limit_wait_s": 22.8,
+          "llm_calls": 2,
+          "input_tokens": 2128,
+          "output_tokens": 2309,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_06",
+          "score": 7,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a great job explaining why dogs are awesome and encouraging your classmates to visit a shelter. Next, add a hook at the start to make people want to listen right away. Keep practicing and your speeches will shine even more!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You started with a statement, but a hook could be a question, surprising fact, or short story to grab attention. Try beginning with something like, \"Did you know dogs can sense when you’re sad?\"",
+              "cited_chunk_ids": [
+                "R8-11",
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Great job stating your main idea early: dogs are the best pets. Keep it simple and clear!",
+              "cited_chunk_ids": [
+                "R13-16",
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": true,
+              "feedback": "You gave two reasons—loyalty and exercise—and backed them with examples. Well done!",
+              "cited_chunk_ids": [
+                "R18-21",
+                "N15-16"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": true,
+              "feedback": "Your ending includes a summary and a call to action. Keep it up!",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 3.86,
+          "rate_limit_wait_s": 31.8,
+          "llm_calls": 2,
+          "input_tokens": 2108,
+          "output_tokens": 2124,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_07",
+          "score": 5,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "'Opening hook': not backed by any retrieved rubric chunk",
+            "'Clear main message': not backed by any retrieved rubric chunk",
+            "'Reasons and examples': not backed by any retrieved rubric chunk",
+            "'Strong ending': not backed by any retrieved rubric chunk",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a good job saying what your speech is about and ending with thanks. Next, add a catchy opening, more reasons with examples, and a clear call to action to make your speech even stronger!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You started with a simple greeting, which is good, but a hook would grab the audience’s attention right away. Try a question or a surprising fact about water to make people curious.",
+              "cited_chunk_ids": [
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Great job stating your main idea early: saving water. Keep it simple and clear!",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You gave one reason about wasting water, but you need at least two reasons, each with an example or fact. Add another reason and show how it matters.",
+              "cited_chunk_ids": [
+                "N15-16"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "You ended with a summary and a thank you, which is good, but a call to action would make it stronger. Ask classmates to turn off the tap while brushing, for example.",
+              "cited_chunk_ids": [
+                "N15-16"
+              ]
+            }
+          ],
+          "latency_s": 3.65,
+          "rate_limit_wait_s": 25.8,
+          "llm_calls": 2,
+          "input_tokens": 2086,
+          "output_tokens": 2012,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_08",
+          "score": 0,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "weak rubric match"
+          ],
+          "overall_feedback": "You made a good start by talking about football. Next, add a hook, a clear main idea, reasons with examples, and a strong ending. Keep practicing and you’ll do great!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You started with a simple statement. Try beginning with a question or a surprising fact to grab attention.",
+              "cited_chunk_ids": [
+                "R8-11",
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "Your speech doesn't state a clear main idea. Add a sentence that says what you want your classmates to think or do.",
+              "cited_chunk_ids": [
+                "R13-16",
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You didn't give reasons or examples. Add at least two reasons why football is good, with examples.",
+              "cited_chunk_ids": [
+                "R18-21",
+                "N15-16"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Your speech ends abruptly. Finish with a summary and a call to action.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 4.49,
+          "rate_limit_wait_s": 23.4,
+          "llm_calls": 2,
+          "input_tokens": 2032,
+          "output_tokens": 2122,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_09",
+          "score": 3,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "'Opening hook': not backed by any retrieved rubric chunk",
+            "'Clear main message': not backed by any retrieved rubric chunk",
+            "'Reasons and examples': not backed by any retrieved rubric chunk",
+            "'Strong ending': not backed by any retrieved rubric chunk",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a great job saying what you think about homework. Next time, start with a hook, give examples for your reasons, and finish with a clear ending. Keep practicing and your speech will shine!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You didn't start with a hook. Try a question or a surprising fact to grab attention.",
+              "cited_chunk_ids": [
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": true,
+              "feedback": "Good job stating your main idea early: homework is bad and should be banned.",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You gave reasons but no examples. Add a story or fact to support each reason.",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Your speech ends abruptly. Finish with a short summary or a call to action.",
+              "cited_chunk_ids": [
+                "N25"
+              ]
+            }
+          ],
+          "latency_s": 3.37,
+          "rate_limit_wait_s": 37.9,
+          "llm_calls": 2,
+          "input_tokens": 1970,
+          "output_tokens": 1673,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_10",
+          "score": 0,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "'Opening hook': not backed by any retrieved rubric chunk",
+            "'Clear main message': not backed by any retrieved rubric chunk",
+            "max_score is 8 but the cited rubric criteria add up to 4",
+            "inconsistent scores",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You started talking about trees, which is a good first step! Next time, try to add a hook, a clear message, reasons with examples, and a strong ending to make your speech more persuasive.",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You started with a plain sentence. Try a question, surprising fact, or short story to grab attention.",
+              "cited_chunk_ids": [
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "You mentioned trees, but the main idea isn’t clear or persuasive. State one simple message early on.",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You didn’t give any reasons or examples. Add at least two reasons with facts or stories.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "Your speech ends abruptly. Finish with a summary and a call to action.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 2.65,
+          "rate_limit_wait_s": 5.7,
+          "llm_calls": 2,
+          "input_tokens": 1956,
+          "output_tokens": 1543,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_11",
+          "score": 0,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "'Opening hook': not backed by any retrieved rubric chunk",
+            "'Clear main message': not backed by any retrieved rubric chunk",
+            "'Reasons and examples': not backed by any retrieved rubric chunk",
+            "'Strong ending': not backed by any retrieved rubric chunk",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You did a good job explaining how to make a sandwich. Next, try adding a hook to grab attention, a clear main message, reasons why your classmates should try it, and a strong ending. Keep practicing and you’ll improve!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You started with instructions, but a hook would grab the audience’s attention. Try a question or a surprising fact first.",
+              "cited_chunk_ids": [
+                "N5-6"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "Your speech doesn’t state a clear idea to persuade. Say one simple sentence about why the class should try the sandwich.",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "You didn’t give reasons or examples to support your idea. Add at least two reasons and explain them.",
+              "cited_chunk_ids": [
+                "N10-11"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "The speech ends abruptly. Finish with a summary and a call to action, like asking classmates to try it.",
+              "cited_chunk_ids": [
+                "N25"
+              ]
+            }
+          ],
+          "latency_s": 4.73,
+          "rate_limit_wait_s": 30.1,
+          "llm_calls": 2,
+          "input_tokens": 2006,
+          "output_tokens": 1704,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        },
+        {
+          "id": "ps_12",
+          "score": 0,
+          "max_score": 8,
+          "needs_review": true,
+          "reasons": [
+            "Answer is off-topic and does not provide a speech script.",
+            "weak rubric match"
+          ],
+          "overall_feedback": "You didn't write a speech script. Try writing a short speech with a hook, a clear main idea, reasons with examples, and a strong ending. Keep it simple and practice speaking it out loud!",
+          "criteria": [
+            {
+              "name": "Opening hook",
+              "met": false,
+              "feedback": "You didn't include a hook. Try starting with a question, a surprising fact, or a short story to grab attention.",
+              "cited_chunk_ids": [
+                "R8-11"
+              ]
+            },
+            {
+              "name": "Clear main message",
+              "met": false,
+              "feedback": "Your answer has no main message. State one clear idea early in the speech so everyone knows what you want them to think.",
+              "cited_chunk_ids": [
+                "R13-16"
+              ]
+            },
+            {
+              "name": "Reasons and examples",
+              "met": false,
+              "feedback": "No reasons or examples were given. Provide at least two reasons and back them up with facts or stories.",
+              "cited_chunk_ids": [
+                "R18-21"
+              ]
+            },
+            {
+              "name": "Strong ending",
+              "met": false,
+              "feedback": "There is no ending. Finish with a summary and a call to action to make your speech memorable.",
+              "cited_chunk_ids": [
+                "R23-26"
+              ]
+            }
+          ],
+          "latency_s": 2.35,
+          "rate_limit_wait_s": 27.0,
+          "llm_calls": 2,
+          "input_tokens": 1972,
+          "output_tokens": 1270,
+          "responses_parsed": 2,
+          "responses_valid_citations": 2
+        }
+      ]
+    }
+  }
+}

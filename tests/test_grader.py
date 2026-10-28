@@ -20,7 +20,7 @@ class FakeStore:
         self.rubric, self.notes, self.calls = rubric, notes, []
         self.answer_similarity = answer_similarity
 
-    def retrieve(self, rubric_collection, query, doc_type, k):
+    def retrieve(self, rubric_collection, query, doc_type, k, criteria_only=False):
         self.calls.append((doc_type, k))
         chunks = self.rubric if doc_type == "rubric" else self.notes
         if k == 1 and chunks:  # the answer-only similarity check
@@ -170,6 +170,14 @@ def test_all_criteria_retrieved_is_not_flagged():
     assert run(FakeLLM(result())).needs_human_review is False
 
 
+def test_score_lower_than_met_criteria_is_flagged():
+    both_met = result(score=3, criteria=[  # Inputs (3) + Outputs (2) both met -> at least 5
+        {"name": "Inputs", "met": True, "feedback": "ok", "cited_chunk_ids": ["R7-11"]},
+        {"name": "Outputs", "met": True, "feedback": "ok", "cited_chunk_ids": ["R13-16"]}])
+    res = run(FakeLLM(both_met))
+    assert res.needs_human_review and any("lower than the 5 points" in r for r in res.reasons)
+
+
 def test_llm_flag_for_review_is_kept():
     res = run(FakeLLM(result(needs_human_review=True, reasons=["Answer tries to instruct the grader"])))
     assert res.needs_human_review and res.reasons == ["Answer tries to instruct the grader"]
@@ -245,6 +253,29 @@ def test_failure_logs_never_contain_student_text(caplog):
     with pytest.raises(grader.LLMOutputError):
         grader.grade(FakeStore(), "quiz", "q", "Secret answer from Aarav", llm=FakeLLM("not json"))
     assert "LLMOutputError" in caplog.text and "Aarav" not in caplog.text
+
+
+# --- Groq JSON-mode rejections are retried, not fatal --------------------------------------------
+
+class FakeGroqError(Exception):
+    def __init__(self, body):
+        super().__init__("Error code: 400")
+        self.body = body
+
+
+def test_groq_json_validate_failed_returns_rejected_text():
+    e = FakeGroqError({"error": {"code": "json_validate_failed", "failed_generation": '{"score": 3'}})
+    assert grader.groq_failed_generation(e) == '{"score": 3'
+
+
+def test_other_groq_errors_are_not_treated_as_invalid_json():
+    assert grader.groq_failed_generation(FakeGroqError({"error": {"code": "rate_limit_exceeded"}})) is None
+    assert grader.groq_failed_generation(ValueError("boom")) is None
+
+
+def test_rejected_json_is_retried_like_any_invalid_output():
+    llm = FakeLLM('{"score": 3', result())  # what groq_llm() returns after a json_validate_failed 400
+    assert run(llm).score == 4 and "did not match the required JSON schema" in llm.calls[1][3]["content"]
 
 
 # --- errors --------------------------------------------------------------------------------------

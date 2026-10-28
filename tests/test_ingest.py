@@ -35,6 +35,24 @@ def test_chunks_are_retrievable_with_metadata(ingested):
     assert "mitochondria" in loc.text and loc.points == 2 and loc.id.startswith("R")
 
 
+def test_general_text_never_takes_a_criterion_slot(tmp_path):
+    """Regression: the public speaking intro text used to fill one of the top-4 slots, dropping a criterion."""
+    assert main([str(ROOT / "data" / "public_speaking"), "--chroma-dir", str(tmp_path)]) == 0
+    s = Store(path=str(tmp_path))
+    query = "Write a short speech script to persuade your class.\nDid you know libraries are great?"
+    hits = s.retrieve("public_speaking", query, "rubric", k=4, criteria_only=True)
+    assert len(hits) == 4 and all(c.criterion for c in hits)
+    assert sum(c.points for c in hits) == 8
+    # Without the filter, general text competes for the slots.
+    assert any(not c.criterion for c in s.retrieve("public_speaking", query, "rubric", k=4))
+
+
+def test_criteria_only_falls_back_when_rubric_has_no_criteria(tmp_path):
+    s = Store(path=str(tmp_path))
+    s.ingest("plain", "Be clear.\n\nBe kind.")
+    assert len(s.retrieve("plain", "clear", "rubric", k=4, criteria_only=True)) == 2
+
+
 def test_cli_rubric_id_flag(tmp_path):
     assert main([str(SAMPLE), "--chroma-dir", str(tmp_path), "--rubric-id", "custom"]) == 0
     assert Store(path=str(tmp_path)).list_rubrics() == ["custom"]

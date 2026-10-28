@@ -67,8 +67,14 @@ class Store:
         chunks = [_from_result(d, m) for d, m in zip(res["documents"], res["metadatas"])]
         return sorted(chunks, key=lambda c: c.start_line)
 
-    def retrieve(self, rubric_id: str, query: str, doc_type: str, k: int) -> list[Chunk]:
+    def retrieve(self, rubric_id: str, query: str, doc_type: str, k: int, criteria_only: bool = False) -> list[Chunk]:
+        """Top-k chunks by similarity. criteria_only skips general rubric text (titles, instructions) so it
+        can't take a slot from a real criterion; falls back to all chunks if the rubric has no criteria."""
         where = {"$and": [{"rubric_id": rubric_id}, {"doc_type": doc_type}]}
+        if criteria_only:
+            only = {"$and": where["$and"] + [{"criterion": {"$ne": ""}}]}
+            if self.collection.get(where=only, limit=1)["ids"]:
+                where = only
         available = len(self.collection.get(where=where)["ids"])
         if available == 0:
             return []
