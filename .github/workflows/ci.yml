@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies (CPU-only torch)
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install -r requirements.txt
+      - name: Run tests (LLM is mocked, no API key needed)
+        run: pytest -q
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t rubricrag .
+      - name: Smoke test the running container
+        run: |
+          docker run -d --name rubricrag -p 8000:8000 -p 8501:8501 rubricrag
+          for i in $(seq 1 60); do curl -sf localhost:8000/health && break; sleep 2; done
+          curl -sf localhost:8000/health
+          curl -sf localhost:8000/rubrics | tee /dev/stderr | grep -q public_speaking
+          for i in $(seq 1 30); do curl -sf localhost:8501/_stcore/health && break; sleep 2; done
+          curl -sf localhost:8501/_stcore/health
+      - name: Container logs (on failure)
+        if: failure()
+        run: docker logs rubricrag
