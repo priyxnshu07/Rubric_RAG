@@ -1,5 +1,7 @@
 # RubricRAG
 
+[![CI](https://github.com/priyxnshu07/Rubric_RAG/actions/workflows/ci.yml/badge.svg)](https://github.com/priyxnshu07/Rubric_RAG/actions/workflows/ci.yml)
+
 A rubric-grounded feedback assistant for teachers. A teacher uploads a rubric and course notes; a student answer is graded by an LLM against the **retrieved rubric criteria**. The result is a score, kind per-criterion feedback for ages 8–14, citations to the exact rubric text used, and a **"needs teacher review"** flag whenever the system isn't sure.
 
 ## Problem
@@ -56,14 +58,14 @@ uvicorn app.main:app --port 8000             # API, docs at http://localhost:800
 streamlit run app/ui.py                      # UI at http://localhost:8501 (second terminal)
 ```
 
-Docker (one container for both). This Dockerfile hasn't been built and tested in this environment:
+Docker (one container for both). On every push, GitHub Actions builds the image and smoke-tests it: the container starts, the API answers `/health` and lists the rubrics, and the UI responds (`.github/workflows/ci.yml`):
 
 ```bash
 docker build -t rubricrag .
 docker run --env-file .env -p 8501:8501 -p 8000:8000 rubricrag
 ```
 
-`pytest` runs the tests with a mocked LLM, so no API key is needed. Tip: set `HF_HUB_OFFLINE=1` once the embedding model has downloaded, for faster start-up.
+`pytest` runs the tests with a mocked LLM, so no API key is needed; CI runs them on every push too. Tip: set `HF_HUB_OFFLINE=1` once the embedding model has downloaded, for faster start-up.
 
 ## Evaluation
 
