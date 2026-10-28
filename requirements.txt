@@ -7,8 +7,9 @@ python-multipart>=0.0.9   # needed for FastAPI file uploads
 chromadb>=0.5
 sentence-transformers>=2.7  # all-MiniLM-L6-v2 embeddings
 
-# LLM
+# LLM (either provider)
 groq>=0.9
+google-genai>=1.0
 
 # Schemas & config
 pydantic>=2.6

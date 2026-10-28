@@ -20,7 +20,7 @@ Asking an LLM "grade this answer" gives scores that are hard to trust: the model
              ┌─────────────────────────────────────────────┼───────────────────────┐
              ▼                                             ▼                       ▼
    ┌──────────────────────┐   embed (MiniLM)   ┌──────────────────────┐   ┌─────────────────┐
-   │ Chunking             │ ─────────────────▶ │ ChromaDB (local)     │   │ Groq LLM        │
+   │ Chunking             │ ─────────────────▶ │ ChromaDB (local)     │   │ Groq / Gemini   │
    │ rubric: 1 per line   │                    │ filtered by          │   │ JSON output,    │
    │ notes: 1 per para    │                    │ rubric_id + doc_type │   │ temperature 0   │
    └──────────────────────┘                    └──────────────────────┘   └────────┬────────┘
@@ -38,7 +38,7 @@ Asking an LLM "grade this answer" gives scores that are hard to trust: the model
 | API | FastAPI | `app/main.py` |
 | Vector store | ChromaDB (local, persistent) | `app/store.py` |
 | Embeddings | sentence-transformers `all-MiniLM-L6-v2` | `app/store.py` |
-| LLM | Groq API (`llama-3.3-70b-versatile` by default) | `app/grader.py` |
+| LLM | Groq or Google Gemini, chosen by `LLM_PROVIDER` | `app/grader.py` |
 | Schemas | Pydantic | `app/schemas.py` |
 | UI | Streamlit | `app/ui.py` |
 | Tests | pytest | `tests/` |
@@ -55,7 +55,7 @@ tests/   pytest unit and integration tests (no API key needed)
 1. **Ingest.** The rubric is split **one chunk per non-empty line**, because each rubric line is a self-contained rule and citing a single line is the most useful feedback. Notes are split into paragraphs. Each chunk keeps its line numbers and an id like `R9` (rubric line 9) or `N4-6` (notes lines 4–6).
 2. **Embed and store.** Chunks are embedded with `all-MiniLM-L6-v2` and stored in ChromaDB with metadata (`rubric_id`, `doc_type`, line numbers). Re-uploading a rubric replaces its old chunks.
 3. **Retrieve.** For a student answer, the question and answer text form the query. The top-k rubric lines (default 8) and top-3 notes paragraphs for that `rubric_id` are retrieved. One rubric can cover a whole quiz, so retrieval is what picks out the right question's criteria.
-4. **Grade.** The LLM receives the chunks tagged with their ids, the question, and the answer wrapped in `<answer>` tags with an instruction to ignore any instructions inside it. It returns JSON: one entry per criterion with score, max score, feedback, and cited ids. This is validated with Pydantic and retried once if malformed.
+4. **Grade.** The LLM (Groq or Gemini; the grader is just a function `(system, user) -> JSON text`, so providers are swappable) receives the chunks tagged with their ids, the question, and the answer wrapped in `<answer>` tags with an instruction to ignore any instructions inside it. It returns JSON: one entry per criterion with score, max score, feedback, and cited ids. This is validated with Pydantic and retried once if malformed.
 5. **Verify in code.** Citations that weren't in the retrieved context are removed, scores are clamped to each criterion's max, and the total is summed in Python. Anything suspicious is returned as a `warning` instead of being hidden.
 
 ### Setup
@@ -64,10 +64,12 @@ tests/   pytest unit and integration tests (no API key needed)
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # then add your GROQ_API_KEY (free at console.groq.com)
+cp .env.example .env   # then add a GEMINI_API_KEY or GROQ_API_KEY and set LLM_PROVIDER
 ```
 
 ### Run
+
+If a model name stops working (providers rename models), set `GEMINI_MODEL` / `GROQ_MODEL` in `.env` to a current one.
 
 ```bash
 uvicorn app.main:app --reload          # API at http://localhost:8000 (docs at /docs)
@@ -90,7 +92,7 @@ The tests use a fake LLM, so they need no API key. They do use the real embeddin
 
 ```bash
 python -m eval.run_eval --retrieval-only   # retrieval metrics only, no API key
-python -m eval.run_eval                    # full pipeline, needs GROQ_API_KEY
+python -m eval.run_eval                    # full pipeline, needs an LLM key
 ```
 
 | Metric | What it checks |
@@ -104,7 +106,7 @@ python -m eval.run_eval                    # full pipeline, needs GROQ_API_KEY
 **Results:** see `eval/results.md` (written by the script).
 
 - **Retrieval:** recall@k = **1.00** for k = 4, 6 and 8 on all 10 cases: every answer retrieved all four criteria for its own question. The default is k = 8 to leave headroom for rubrics with more criteria per question. This is an easy setting, though: each rubric line is prefixed with its question name, which makes matching easy.
-- **Grading (LLM):** run `python -m eval.run_eval` with a Groq key to fill in MAE, accuracy and citation precision.
+- **Grading (LLM):** run `python -m eval.run_eval` with an LLM key to fill in MAE, accuracy and citation precision.
 
 ## Limitations
 

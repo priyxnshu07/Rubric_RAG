@@ -71,7 +71,8 @@ def main():
             f"Max score correct (right criteria graded): {max_ok}/{n}",
             f"Citation precision: {sum(precisions) / len(precisions):.2f}" if precisions else "Citation precision: n/a",
             f"Criteria with invented citations removed: {removed}",
-            f"Model: {config.GROQ_MODEL}",
+            f"Model: {config.LLM_PROVIDER} / "
+            f"{config.GROQ_MODEL if config.LLM_PROVIDER == 'groq' else config.GEMINI_MODEL}",
         ]
 
     header = "| case | recall | expected |" + ("" if args.retrieval_only else " got | max | warnings |")

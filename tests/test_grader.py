@@ -74,6 +74,22 @@ def test_unknown_rubric_raises_lookup_error():
         grader.grade(FakeStore(rubric=[]), "missing", "answer", llm=fake_llm(GOOD))
 
 
+def test_provider_setting_picks_the_llm(monkeypatch):
+    monkeypatch.setattr(grader.config, "LLM_PROVIDER", "gemini")
+    assert grader.default_llm() is grader.gemini_llm
+    monkeypatch.setattr(grader.config, "LLM_PROVIDER", "groq")
+    assert grader.default_llm() is grader.groq_llm
+    monkeypatch.setattr(grader.config, "LLM_PROVIDER", "openai")
+    with pytest.raises(RuntimeError):
+        grader.default_llm()
+
+
+def test_missing_gemini_key_gives_clear_error(monkeypatch):
+    monkeypatch.setattr(grader.config, "GEMINI_API_KEY", "")
+    with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):
+        grader.gemini_llm("system", "user")
+
+
 def test_prompt_wraps_answer_and_lists_chunk_ids():
     prompt = grader.build_user_prompt("Explain photosynthesis", "my answer", RUBRIC, [])
     assert "[R3] Q1 Inputs (3 points)" in prompt

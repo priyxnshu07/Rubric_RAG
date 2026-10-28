@@ -16,7 +16,7 @@ def get_store() -> Store:
 
 
 def get_llm() -> grader.LLM:
-    return grader.groq_llm
+    return grader.default_llm()
 
 
 @app.get("/health")

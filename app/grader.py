@@ -42,13 +42,46 @@ def groq_llm(system: str, user: str) -> str:
     if not config.GROQ_API_KEY:
         raise RuntimeError("GROQ_API_KEY is not set. Copy .env.example to .env and add your key.")
     client = Groq(api_key=config.GROQ_API_KEY)
-    resp = client.chat.completions.create(
-        model=config.GROQ_MODEL,
-        messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-        temperature=0,  # same answer -> same grade, as far as the model allows
-        response_format={"type": "json_object"},
-    )
+    try:
+        resp = client.chat.completions.create(
+            model=config.GROQ_MODEL,
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+            temperature=0,  # same answer -> same grade, as far as the model allows
+            response_format={"type": "json_object"},
+        )
+    except Exception as e:  # bad key, unknown model, rate limit... surface the reason to the UI
+        raise RuntimeError(f"Groq API error: {e}") from e
     return resp.choices[0].message.content
+
+
+def gemini_llm(system: str, user: str) -> str:
+    from google import genai
+    from google.genai import types
+
+    if not config.GEMINI_API_KEY:
+        raise RuntimeError("GEMINI_API_KEY is not set. Copy .env.example to .env and add your key.")
+    client = genai.Client(api_key=config.GEMINI_API_KEY)
+    try:
+        resp = client.models.generate_content(
+            model=config.GEMINI_MODEL,
+            contents=user,
+            config=types.GenerateContentConfig(
+                system_instruction=system,
+                temperature=0,
+                response_mime_type="application/json",
+            ),
+        )
+    except Exception as e:  # bad key, unknown model, quota... surface the reason to the UI
+        raise RuntimeError(f"Gemini API error: {e}") from e
+    return resp.text
+
+
+def default_llm() -> LLM:
+    """Pick the LLM from the LLM_PROVIDER setting."""
+    providers = {"groq": groq_llm, "gemini": gemini_llm}
+    if config.LLM_PROVIDER not in providers:
+        raise RuntimeError(f"Unknown LLM_PROVIDER '{config.LLM_PROVIDER}'. Use 'groq' or 'gemini'.")
+    return providers[config.LLM_PROVIDER]
 
 
 def format_context(rubric: list[Chunk], notes: list[Chunk]) -> str:
@@ -110,7 +143,8 @@ def postprocess(rubric_id: str, output: _LLMOutput, context: list[Chunk]) -> Gra
     )
 
 
-def grade(store, rubric_id: str, answer: str, question: str = "", llm: LLM = groq_llm) -> GradeResponse:
+def grade(store, rubric_id: str, answer: str, question: str = "", llm: LLM | None = None) -> GradeResponse:
+    llm = llm or default_llm()
     query = f"{question}\n{answer}"
     rubric = store.retrieve(rubric_id, query, "rubric", config.TOP_K_RUBRIC)
     if not rubric:
