@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from app import main
+from app import grader, main
 from app.ingest import load_folder
 from app.store import Store
 
@@ -24,16 +24,24 @@ def chunk_id(store, criterion):
     return next(c.id for c in store.get_chunks("biology-quiz-1", "rubric") if c.criterion == criterion)
 
 
+GRADE_REQUEST = {"rubric_collection": "biology-quiz-1", "question": "Where does respiration happen?",
+                 "answer": "It happens in the mitochondria."}
+
+
 @pytest.fixture
-def client(store):
+def llm_reply(store):
+    """Mutable holder for what the mocked LLM returns; tests can swap in a function."""
     location = chunk_id(store, "Q2 Cellular respiration > Location")
+    return {"fn": lambda messages: json.dumps({
+        "score": 2, "max_score": 2,
+        "criteria": [{"name": "Location", "met": True, "feedback": "Correct.", "cited_chunk_ids": [location]}],
+        "overall_feedback": "Correct location.", "needs_human_review": False, "reasons": []})}
 
-    def fake_llm(system, user):
-        return json.dumps({"criteria": [{"criterion": "Location", "score": 2, "max_score": 2,
-                                         "feedback": "Correct.", "citations": [location]}]})
 
+@pytest.fixture
+def client(store, llm_reply):
     main.app.dependency_overrides[main.get_store] = lambda: store
-    main.app.dependency_overrides[main.get_llm] = lambda: fake_llm
+    main.app.dependency_overrides[main.get_llm] = lambda: (lambda messages: llm_reply["fn"](messages))
     yield TestClient(main.app)
     main.app.dependency_overrides.clear()
 
@@ -56,20 +64,55 @@ def test_list_rubrics(client):
     assert client.get("/rubrics").json() == ["biology-quiz-1"]
 
 
-def test_grade_endpoint(client, store):
-    res = client.post("/grade", json={"rubric_id": "biology-quiz-1", "answer": "It happens in the mitochondria."})
+def test_grade_endpoint_returns_exact_schema(client, store):
+    res = client.post("/grade", json=GRADE_REQUEST)
     assert res.status_code == 200
     body = res.json()
-    assert body["total_score"] == 2
-    cit = body["citations"][0]
-    assert cit["id"] == chunk_id(store, "Q2 Cellular respiration > Location")
-    assert "mitochondria" in cit["text"]
-    assert cit["criterion"] == "Q2 Cellular respiration > Location" and cit["source"] == "rubric.md"
+    assert set(body) == {"score", "max_score", "criteria", "overall_feedback", "needs_human_review", "reasons"}
+    assert set(body["criteria"][0]) == {"name", "met", "feedback", "cited_chunk_ids"}
+    assert body["score"] == 2 and body["needs_human_review"] is False
+    assert body["criteria"][0]["cited_chunk_ids"] == [chunk_id(store, "Q2 Cellular respiration > Location")]
 
 
-def test_grade_unknown_rubric_returns_404(client):
-    res = client.post("/grade", json={"rubric_id": "nope", "answer": "x"})
-    assert res.status_code == 404
+def test_chunks_endpoint_resolves_cited_ids(client, store):
+    chunks = {c["id"]: c for c in client.get("/rubrics/biology-quiz-1/chunks").json()}
+    loc = chunks[chunk_id(store, "Q2 Cellular respiration > Location")]
+    assert "mitochondria" in loc["text"] and loc["source"] == "rubric.md"
+
+
+def test_grade_unknown_collection_returns_404(client):
+    res = client.post("/grade", json={**GRADE_REQUEST, "rubric_collection": "nope"})
+    assert res.status_code == 404 and "'nope' not found" in res.json()["detail"]
+
+
+@pytest.mark.parametrize("missing", ["question", "answer", "rubric_collection"])
+def test_grade_missing_field_returns_422(client, missing):
+    body = {k: v for k, v in GRADE_REQUEST.items() if k != missing}
+    res = client.post("/grade", json=body)
+    assert res.status_code == 422 and missing in str(res.json()["detail"])
+
+
+def test_grade_invalid_llm_output_returns_502_with_reason(client, llm_reply):
+    llm_reply["fn"] = lambda messages: "this is not json"
+    res = client.post("/grade", json=GRADE_REQUEST)
+    assert res.status_code == 502
+    assert "invalid output 3 times" in res.json()["detail"]
+
+
+def test_grade_provider_failure_returns_502(client, llm_reply):
+    def down(messages):
+        raise grader.LLMProviderError("Groq API error: 503 service unavailable")
+    llm_reply["fn"] = down
+    res = client.post("/grade", json=GRADE_REQUEST)
+    assert res.status_code == 502 and "LLM provider error" in res.json()["detail"]
+
+
+def test_grade_missing_key_returns_500(client, llm_reply):
+    def no_key(messages):
+        raise grader.LLMConfigError("GROQ_API_KEY is not set.")
+    llm_reply["fn"] = no_key
+    res = client.post("/grade", json=GRADE_REQUEST)
+    assert res.status_code == 500 and "GROQ_API_KEY" in res.json()["detail"]
 
 
 def test_ingest_files_endpoint(tmp_path):

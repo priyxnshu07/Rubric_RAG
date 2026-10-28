@@ -46,23 +46,24 @@ with student:
         st.info("No rubrics yet. Upload one in the Teacher tab.")
     else:
         chosen = st.selectbox("Rubric", rubrics)
-        question = st.text_input("Question (optional)")
+        question = st.text_input("Question")
         answer = st.text_area("Student answer", height=200)
-        if st.button("Grade", type="primary", disabled=not answer.strip()):
-            with st.spinner("Retrieving rubric lines and grading..."):
-                res = api("POST", "/grade", json={"rubric_id": chosen, "question": question, "answer": answer})
+        if st.button("Grade", type="primary", disabled=not (question.strip() and answer.strip())):
+            with st.spinner("Retrieving rubric chunks and grading..."):
+                res = api("POST", "/grade", json={"rubric_collection": chosen, "question": question,
+                                                  "answer": answer})
+                chunks = {c["id"]: c for c in api("GET", f"/rubrics/{chosen}/chunks")}
 
-            st.metric("Score", f"{res['total_score']:g} / {res['max_score']:g}")
-            for w in res["warnings"]:
-                st.warning(w)
+            st.metric("Score", f"{res['score']} / {res['max_score']}")
+            if res["needs_human_review"]:
+                st.warning("Needs human review:\n\n" + "\n".join(f"- {r}" for r in res["reasons"]))
+            st.write(res["overall_feedback"])
             for c in res["criteria"]:
-                with st.expander(f"{c['criterion']}: {c['score']:g} / {c['max_score']:g}", expanded=True):
+                with st.expander(f"{'✅' if c['met'] else '❌'} {c['name']}", expanded=True):
                     st.write(c["feedback"])
-                    if c["citations"]:
-                        st.caption("Based on: " + ", ".join(c["citations"]))
-            st.subheader("Cited rubric criteria")
-            for cit in res["citations"]:
-                lines = (f"line {cit['start_line']}" if cit["start_line"] == cit["end_line"]
-                         else f"lines {cit['start_line']}-{cit['end_line']}")
-                st.markdown(f"**[{cit['id']}] {cit['criterion'] or 'General'}** ({cit['source']}, {lines})")
-                st.text(cit["text"])
+                    for cid in c["cited_chunk_ids"]:
+                        ch = chunks.get(cid)
+                        if ch:
+                            st.caption(f"[{cid}] {ch['criterion'] or 'General'} "
+                                       f"({ch['source']}, lines {ch['start_line']}-{ch['end_line']})")
+                            st.text(ch["text"])

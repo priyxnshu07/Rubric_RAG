@@ -8,7 +8,8 @@ Metrics
 - Score MAE / within-1: how far the LLM's total is from the teacher's reference score.
 - Max-score correct: did the LLM grade exactly the right question's criteria (max = 10)?
 - Citation precision: share of cited rubric criteria that belong to the question being graded.
-- Removed citations: ids the LLM invented that our post-processing had to strip.
+- Rejected citations: ids the LLM invented that survived retries and were stripped.
+- Human review: how many grades were flagged needs_human_review.
 Results are printed and written to eval/results.md.
 """
 import argparse
@@ -43,7 +44,7 @@ def main():
     cases = load_cases()
 
     rows, recalls = [], []
-    abs_errors, within1, max_ok, precisions, removed = [], 0, 0, [], 0
+    abs_errors, within1, max_ok, precisions, removed, reviews = [], 0, 0, [], 0, 0
     for case in cases:
         # The question's criteria: every rubric chunk whose criterion name starts with e.g. "Q1".
         expected = {c.id for c in rubric_chunks if c.criterion.startswith(case["expected_question"])}
@@ -54,16 +55,17 @@ def main():
         row = {"id": case["id"], "recall": recall, "expected": case["expected_score"]}
 
         if not args.retrieval_only:
-            res = grader.grade(store, RUBRIC_ID, case["answer"], case["question"])
-            err = abs(res.total_score - case["expected_score"])
+            res = grader.grade(store, RUBRIC_ID, case["question"], case["answer"])
+            err = abs(res.score - case["expected_score"])
             abs_errors.append(err)
             within1 += err <= 1
             max_ok += res.max_score == case["expected_max"]
-            cited = [c.id for c in res.citations if c.id.startswith("R")]
+            cited = sorted({cid for c in res.criteria for cid in c.cited_chunk_ids if cid.startswith("R")})
             if cited:
                 precisions.append(len([c for c in cited if c in expected]) / len(cited))
-            removed += sum("removed citations" in w for w in res.warnings)
-            row.update(got=res.total_score, max=res.max_score, warnings=len(res.warnings))
+            removed += sum("rejected citations" in r for r in res.reasons)
+            reviews += res.needs_human_review
+            row.update(got=res.score, max=res.max_score, review="yes" if res.needs_human_review else "")
         rows.append(row)
 
     n = len(cases)
@@ -74,18 +76,19 @@ def main():
             f"Within 1 point of reference: {within1}/{n}",
             f"Max score correct (right criteria graded): {max_ok}/{n}",
             f"Citation precision: {sum(precisions) / len(precisions):.2f}" if precisions else "Citation precision: n/a",
-            f"Criteria with invented citations removed: {removed}",
+            f"Criteria with invented citations rejected: {removed}",
+            f"Flagged for human review: {reviews}/{n}",
             f"Model: {config.LLM_PROVIDER} / "
             f"{config.GROQ_MODEL if config.LLM_PROVIDER == 'groq' else config.GEMINI_MODEL}",
         ]
 
-    header = "| case | recall | expected |" + ("" if args.retrieval_only else " got | max | warnings |")
+    header = "| case | recall | expected |" + ("" if args.retrieval_only else " got | max | review |")
     sep = "|---|---|---|" + ("" if args.retrieval_only else "---|---|---|")
     lines = [header, sep]
     for r in rows:
         line = f"| {r['id']} | {r['recall']:.2f} | {r['expected']} |"
         if not args.retrieval_only:
-            line += f" {r['got']:g} | {r['max']:g} | {r['warnings']} |"
+            line += f" {r['got']} | {r['max']} | {r['review']} |"
         lines.append(line)
 
     report = "# Evaluation results\n\n" + "\n".join(f"- {s}" for s in summary) + "\n\n" + "\n".join(lines) + "\n"

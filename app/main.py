@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 
 from app import grader
 from app.loaders import read_document
-from app.schemas import GradeRequest, GradeResponse, IngestRequest, IngestResponse
+from app.schemas import Chunk, GradeRequest, GradeResponse, IngestRequest, IngestResponse
 from app.store import Store
 
 app = FastAPI(title="RubricRAG", description="Rubric-grounded feedback assistant")
@@ -17,7 +17,10 @@ def get_store() -> Store:
 
 
 def get_llm() -> grader.LLM:
-    return grader.default_llm()
+    try:
+        return grader.default_llm()
+    except grader.LLMConfigError as e:
+        raise HTTPException(500, f"Server configuration error: {e}")
 
 
 @app.get("/health")
@@ -28,6 +31,15 @@ def health():
 @app.get("/rubrics", response_model=list[str])
 def list_rubrics(store: Store = Depends(get_store)):
     return store.list_rubrics()
+
+
+@app.get("/rubrics/{rubric_collection}/chunks", response_model=list[Chunk])
+def rubric_chunks(rubric_collection: str, store: Store = Depends(get_store)):
+    """All rubric chunks of a collection, so clients can show the text behind cited_chunk_ids."""
+    chunks = store.get_chunks(rubric_collection, "rubric") + store.get_chunks(rubric_collection, "notes")
+    if not chunks:
+        raise HTTPException(404, f"Rubric collection '{rubric_collection}' not found.")
+    return chunks
 
 
 @app.post("/ingest", response_model=IngestResponse)
@@ -58,11 +70,18 @@ async def ingest_files(
 
 @app.post("/grade", response_model=GradeResponse)
 def grade(req: GradeRequest, store: Store = Depends(get_store), llm: grader.LLM = Depends(get_llm)):
+    """Grade an answer against the top-4 retrieved rubric chunks.
+
+    Errors: 404 unknown rubric_collection, 422 invalid request body, 500 server misconfigured
+    (e.g. missing API key), 502 LLM provider failed or kept returning invalid output.
+    """
     try:
-        return grader.grade(store, req.rubric_id, req.answer, req.question, llm=llm)
+        return grader.grade(store, req.rubric_collection, req.question, req.answer, llm=llm)
     except LookupError as e:
         raise HTTPException(404, str(e))
-    except RuntimeError as e:  # e.g. missing API key
-        raise HTTPException(500, str(e))
-    except ValueError as e:  # LLM output could not be parsed
-        raise HTTPException(502, str(e))
+    except grader.LLMConfigError as e:
+        raise HTTPException(500, f"Server configuration error: {e}")
+    except grader.LLMProviderError as e:
+        raise HTTPException(502, f"LLM provider error: {e}")
+    except grader.LLMOutputError as e:
+        raise HTTPException(502, f"Grading failed: {e}")

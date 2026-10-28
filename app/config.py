@@ -16,5 +16,5 @@ CHROMA_DIR = os.getenv("CHROMA_DIR", "chroma_db")
 EMBED_MODEL = "all-MiniLM-L6-v2"
 
 # How many chunks to retrieve per grading request.
-TOP_K_RUBRIC = int(os.getenv("TOP_K_RUBRIC", "8"))
+TOP_K_RUBRIC = int(os.getenv("TOP_K_RUBRIC", "4"))
 TOP_K_NOTES = int(os.getenv("TOP_K_NOTES", "3"))

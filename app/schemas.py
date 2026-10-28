@@ -1,7 +1,7 @@
 """Pydantic models shared by the API, the grader and the UI."""
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Chunk(BaseModel):
@@ -30,32 +30,30 @@ class IngestResponse(BaseModel):
 
 
 class GradeRequest(BaseModel):
-    rubric_id: str
-    question: str = ""
+    question: str = Field(..., min_length=1)
     answer: str = Field(..., min_length=1)
+    rubric_collection: str = Field(..., min_length=1, description="Name the rubric was ingested under")
 
 
 class CriterionResult(BaseModel):
-    criterion: str
-    score: float = Field(..., ge=0)
-    max_score: float = Field(..., gt=0)
+    name: str = Field(..., min_length=1)
+    met: bool
     feedback: str
-    citations: list[str] = Field(default_factory=list, description="Chunk ids the judgement is based on")
-
-
-class Citation(BaseModel):
-    id: str
-    text: str
-    start_line: int
-    end_line: int
-    source: str = ""
-    criterion: str = ""
+    cited_chunk_ids: list[str] = Field(default_factory=list, description="Retrieved chunk ids this is based on")
 
 
 class GradeResponse(BaseModel):
-    rubric_id: str
-    total_score: float
-    max_score: float
-    criteria: list[CriterionResult]
-    citations: list[Citation]  # the cited chunks, resolved to their text and line numbers
-    warnings: list[str] = Field(default_factory=list)
+    """What the LLM must return, and what /grade returns after our checks."""
+
+    score: int = Field(..., ge=0)
+    max_score: int = Field(..., gt=0)
+    criteria: list[CriterionResult] = Field(..., min_length=1)
+    overall_feedback: str
+    needs_human_review: bool = False
+    reasons: list[str] = Field(default_factory=list, description="Why human review is needed")
+
+    @model_validator(mode="after")
+    def score_not_above_max(self):
+        if self.score > self.max_score:
+            raise ValueError(f"score ({self.score}) cannot be greater than max_score ({self.max_score})")
+        return self
