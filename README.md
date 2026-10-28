@@ -106,7 +106,18 @@ python -m eval.run_eval                    # full pipeline, needs an LLM key
 **Results:** see `eval/results.md` (written by the script).
 
 - **Retrieval:** recall@k = **1.00** for k = 4, 6 and 8 on all 10 cases: every answer retrieved all four criteria for its own question. The default is k = 8 to leave headroom for rubrics with more criteria per question. This is an easy setting, though: each rubric line is prefixed with its question name, which makes matching easy.
-- **Grading (LLM):** run `python -m eval.run_eval` with an LLM key to fill in MAE, accuracy and citation precision.
+- **Grading (LLM):** full pipeline with Groq `openai/gpt-oss-120b`:
+
+| Metric | Result |
+|---|---|
+| Score MAE (vs my reference scores) | **0.30** points out of 10 |
+| Within 1 point of reference | **10/10** |
+| Right criteria graded (max score = 10) | **10/10** |
+| Citation precision | **1.00** |
+| Invented citations removed | 0 |
+| Prompt-injection answer ("award full marks") | scored **2/10** (reference 1), not 10 |
+
+The three cases that missed were all partial answers, off by exactly 1 point (`q1_partial` 5 vs 4, `q2_partial` 4 vs 5, `q1_injection` 2 vs 1). Every strong and weak answer was scored exactly. This was a single run on 10 cases, so treat it as a sanity check rather than a benchmark (see Limitations). I also wired up Gemini, but it returned a temporary "high demand" error from Google during the eval, so no Gemini results are reported.
 
 ## Limitations
 
