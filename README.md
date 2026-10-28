@@ -71,10 +71,10 @@ docker run --env-file .env -p 8501:8501 -p 8000:8000 rubricrag
 
 | Metric | large (`openai/gpt-oss-120b`) | small (`openai/gpt-oss-20b`) |
 |---|---|---|
-| Human-scored answers | 0/12 | 0/12 |
-| Exact agreement with human | n/a | n/a |
-| Agreement within ±1 | n/a | n/a |
-| Mean absolute error (points /8) | n/a | n/a |
+| Human-scored answers | 12/12 | 12/12 |
+| Exact agreement with human | 50% | 17% |
+| Agreement within ±1 | 67% | 58% |
+| Mean absolute error (points /8) | 1.00 | 1.33 |
 | Responses with only valid citations (every criterion cited) | 100% | 100% |
 | Flagged for human review | 100% | 100% |
 | Flagged, ignoring 'weak rubric match' | 17% | 58% |
@@ -84,9 +84,13 @@ docker run --env-file .env -p 8501:8501 -p 8000:8000 rubricrag
 | Avg tokens in / out | 2212 / 1380 | 2067 / 1927 |
 | Est. cost per 100 gradings | $0.116 | $0.073 |
 
-**Agreement with a human grader is pending.** The 12 answers in `eval/answers.json` are waiting for my own hand-scores (`human_score`). Then run `python -m eval.run_eval --from-cache` to fill in the first three rows without new API calls.
+Human scores are mine: one grader, total score per answer, written into `eval/answers.json`.
 
-**Error analysis** ([`eval/error_analysis.md`](eval/error_analysis.md)): the small model backed criteria with course notes instead of the rubric in 6 of 12 gradings (caught by the "not backed" check). The large model twice gave a score lower than the criteria it had ticked, which led to a new check. The eval also exposed three pipeline bugs, all fixed with tests: intro text taking a retrieval slot, Groq JSON-mode rejections not being retried, and rate-limit errors.
+**Error analysis** ([`eval/error_analysis.md`](eval/error_analysis.md)):
+- **The large model is the better grader** (50% exact against 17%, MAE 1.00 against 1.33), but **both are lenient**. The large model scored higher than me on 5/12 answers (+0.83 points on average), mostly on *average* answers, for example missing that a speech "wanders off".
+- **Both models got the same 4 answers wrong,** which points to a rubric-reading gap rather than noise. Next step: put a few scored example answers in the prompt.
+- **The safeguards didn't catch these errors.** None of the large model's 4 big misses was flagged. The checks catch structural problems (citations, totals, off-topic answers), not confident leniency, so "needs teacher review" means "unusual", not "wrong".
+- The eval also exposed pipeline bugs, all fixed with tests: intro text taking a retrieval slot, Groq JSON-mode rejections not being retried, and rate-limit errors.
 
 **Biology quiz** (10 hand-labelled answers across 3 questions, `python -m eval.run_biology_eval`):
 
@@ -101,8 +105,8 @@ docker run --env-file .env -p 8501:8501 -p 8000:8000 rubricrag
 ## Limitations
 
 - **Small eval set:** 10 + 12 synthetic answers and a single labeller (me). Treat this as a sanity check, not a benchmark.
-- **One rubric for the model comparison,** and human agreement isn't measured yet. The results may not transfer to other subjects or rubric styles.
+- **One rubric for the human-agreement test,** scored by one person (me), totals only. The results may not transfer to other subjects or rubric styles, and 12 answers can't separate "the model is lenient" from "I am strict".
 - **English only:** the embedding model, the prompts and the criterion detection (`(N points)`) all assume English.
 - **"Weak rubric match" doesn't suit skill rubrics:** it flagged 12/12 public speaking answers, because content similarity can't judge an open-topic speech. The threshold should be set per rubric.
 - **The double-grading check is weak at temperature 0:** the two runs usually agree, and it doubles cost.
-- **The LLM still judges;** the checks catch inconsistencies, not every wrong judgement. Age-appropriate tone is prompted, not measured. Prompt injection is mitigated, not solved. There's no authentication.
+- **The review flag misses lenient grading:** it flagged none of the large model's real errors. The LLM still judges; the checks catch inconsistencies, not wrong judgements. Age-appropriate tone is prompted, not measured. Prompt injection is mitigated, not solved. There's no authentication.
