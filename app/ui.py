@@ -30,14 +30,14 @@ teacher, student = st.tabs(["1. Teacher: upload rubric", "2. Grade an answer"])
 
 with teacher:
     rubric_id = st.text_input("Rubric name", placeholder="e.g. photosynthesis-q1")
-    rubric_file = st.file_uploader("Rubric (.txt or .md)", type=["txt", "md"])
-    notes_file = st.file_uploader("Course notes (optional, .txt or .md)", type=["txt", "md"])
+    rubric_file = st.file_uploader("Rubric (.md, .txt or .pdf)", type=["md", "txt", "pdf"])
+    notes_file = st.file_uploader("Course notes (optional, .md, .txt or .pdf)", type=["md", "txt", "pdf"])
     if st.button("Upload", type="primary", disabled=not (rubric_id and rubric_file)):
         files = {"rubric": (rubric_file.name, rubric_file.getvalue())}
         if notes_file:
             files["notes"] = (notes_file.name, notes_file.getvalue())
         res = api("POST", "/ingest/files", data={"rubric_id": rubric_id}, files=files)
-        st.success(f"Stored '{res['rubric_id']}': {res['rubric_chunks']} rubric lines, "
+        st.success(f"Stored '{res['rubric_id']}': {res['rubric_chunks']} rubric chunks, "
                    f"{res['notes_chunks']} notes chunks.")
 
 with student:
@@ -60,8 +60,9 @@ with student:
                     st.write(c["feedback"])
                     if c["citations"]:
                         st.caption("Based on: " + ", ".join(c["citations"]))
-            st.subheader("Cited rubric lines")
+            st.subheader("Cited rubric criteria")
             for cit in res["citations"]:
                 lines = (f"line {cit['start_line']}" if cit["start_line"] == cit["end_line"]
                          else f"lines {cit['start_line']}-{cit['end_line']}")
-                st.markdown(f"**[{cit['id']}]** ({lines}) {cit['text']}")
+                st.markdown(f"**[{cit['id']}] {cit['criterion'] or 'General'}** ({cit['source']}, {lines})")
+                st.text(cit["text"])

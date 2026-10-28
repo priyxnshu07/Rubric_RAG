@@ -1,4 +1,4 @@
-Example answers you can paste into the UI (rubric: biology-quiz-1).
+Example answers you can paste into the UI (rubric: biology-quiz-1, ingest with: python -m app.ingest data/biology-quiz-1).
 
 Q1 (strong): Photosynthesis happens in the chloroplasts of plant cells. Chlorophyll absorbs light energy, which is used to turn carbon dioxide and water into glucose and oxygen. In this way light energy is converted into chemical energy stored in glucose.
 

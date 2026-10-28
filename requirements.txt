@@ -11,6 +11,9 @@ sentence-transformers>=2.7  # all-MiniLM-L6-v2 embeddings
 groq>=0.9
 google-genai>=1.0
 
+# Document loading
+pypdf>=4.0
+
 # Schemas & config
 pydantic>=2.6
 python-dotenv>=1.0

@@ -1,3 +1,7 @@
+# Biology course notes
+
+## Photosynthesis
+
 Photosynthesis is the process plants use to make their own food. It takes place in the chloroplasts,
 which contain the green pigment chlorophyll. Chlorophyll absorbs light energy.
 
@@ -5,11 +9,15 @@ During photosynthesis, carbon dioxide from the air and water from the soil are c
 to produce glucose and oxygen. Light energy is converted into chemical energy stored in glucose.
 Word equation: carbon dioxide + water -> glucose + oxygen.
 
+## Cellular respiration
+
 Cellular respiration releases the energy stored in glucose. Aerobic respiration happens in the mitochondria
 and uses oxygen: glucose + oxygen -> carbon dioxide + water + energy. The energy is stored as ATP.
 
 Anaerobic respiration happens without oxygen. In human muscles it produces lactic acid; in yeast it produces
 ethanol and carbon dioxide. It releases much less ATP than aerobic respiration.
+
+## Water cycle
 
 The water cycle is driven by heat from the sun. Water evaporates from oceans, lakes and rivers, and plants
 release water vapour through their leaves in a process called transpiration.

@@ -1,13 +1,13 @@
 """Evaluate RubricRAG on hand-labelled answers in eval/cases.jsonl.
 
     python -m eval.run_eval --retrieval-only   # no API key needed
-    python -m eval.run_eval                     # full run, needs GROQ_API_KEY
+    python -m eval.run_eval                     # full run, needs an LLM key in .env
 
 Metrics
-- Retrieval recall@k: share of the question's rubric lines that retrieval returned.
+- Retrieval recall@k: share of the question's rubric criteria that retrieval returned.
 - Score MAE / within-1: how far the LLM's total is from the teacher's reference score.
 - Max-score correct: did the LLM grade exactly the right question's criteria (max = 10)?
-- Citation precision: share of cited rubric lines that belong to the question being graded.
+- Citation precision: share of cited rubric criteria that belong to the question being graded.
 - Removed citations: ids the LLM invented that our post-processing had to strip.
 Results are printed and written to eval/results.md.
 """
@@ -17,10 +17,12 @@ import tempfile
 from pathlib import Path
 
 from app import config, grader
+from app.ingest import load_folder
 from app.store import Store
 
 ROOT = Path(__file__).parent.parent
 RUBRIC_ID = "biology-quiz-1"
+RUBRIC_DIR = ROOT / "data" / RUBRIC_ID
 
 
 def load_cases():
@@ -35,14 +37,16 @@ def main():
     config.TOP_K_RUBRIC = args.k
 
     store = Store(path=tempfile.mkdtemp(prefix="rubricrag-eval-"))
-    store.ingest(RUBRIC_ID, (ROOT / "data/biology_quiz_rubric.txt").read_text(),
-                 (ROOT / "data/biology_notes.txt").read_text())
+    rubric, notes, _ = load_folder(RUBRIC_DIR)
+    store.ingest_documents(RUBRIC_ID, rubric, notes)
+    rubric_chunks = store.get_chunks(RUBRIC_ID, "rubric")
     cases = load_cases()
 
     rows, recalls = [], []
     abs_errors, within1, max_ok, precisions, removed = [], 0, 0, [], 0
     for case in cases:
-        expected = set(case["expected_lines"])
+        # The question's criteria: every rubric chunk whose criterion name starts with e.g. "Q1".
+        expected = {c.id for c in rubric_chunks if c.criterion.startswith(case["expected_question"])}
         query = f"{case['question']}\n{case['answer']}"
         retrieved = {c.id for c in store.retrieve(RUBRIC_ID, query, "rubric", args.k)}
         recall = len(expected & retrieved) / len(expected)

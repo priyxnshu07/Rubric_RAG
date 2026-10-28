@@ -4,6 +4,7 @@ from functools import lru_cache
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 
 from app import grader
+from app.loaders import read_document
 from app.schemas import GradeRequest, GradeResponse, IngestRequest, IngestResponse
 from app.store import Store
 
@@ -42,15 +43,17 @@ async def ingest_files(
     notes: UploadFile | None = File(None),
     store: Store = Depends(get_store),
 ):
-    """Same as /ingest, but takes .txt / .md file uploads."""
+    """Same as /ingest, but takes .md / .txt / .pdf file uploads."""
     try:
-        rubric_text = (await rubric.read()).decode("utf-8")
-        notes_text = (await notes.read()).decode("utf-8") if notes else ""
-    except UnicodeDecodeError:
-        raise HTTPException(400, "Files must be UTF-8 text (.txt or .md).")
+        rubric_text = read_document(rubric.filename, await rubric.read())
+        notes_text = read_document(notes.filename, await notes.read()) if notes else ""
+    except ValueError as e:
+        raise HTTPException(400, str(e))
     if not rubric_text.strip():
         raise HTTPException(400, "Rubric file is empty.")
-    return ingest(IngestRequest(rubric_id=rubric_id, rubric_text=rubric_text, notes_text=notes_text), store)
+    r, n = store.ingest(rubric_id, rubric_text, notes_text, rubric_source=rubric.filename,
+                        notes_source=notes.filename if notes else "notes")
+    return IngestResponse(rubric_id=rubric_id, rubric_chunks=r, notes_chunks=n)
 
 
 @app.post("/grade", response_model=GradeResponse)

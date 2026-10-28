@@ -130,8 +130,8 @@ def postprocess(rubric_id: str, output: _LLMOutput, context: list[Chunk]) -> Gra
         criteria.append(cr.model_copy(update={"score": score, "citations": valid}))
 
     cited_ids = sorted({cid for cr in criteria for cid in cr.citations}, key=lambda i: by_id[i].start_line)
-    citations = [Citation(id=i, text=by_id[i].text, start_line=by_id[i].start_line,
-                          end_line=by_id[i].end_line) for i in cited_ids]
+    citations = [Citation(id=i, text=by_id[i].text, start_line=by_id[i].start_line, end_line=by_id[i].end_line,
+                          source=by_id[i].source, criterion=by_id[i].criterion) for i in cited_ids]
 
     return GradeResponse(
         rubric_id=rubric_id,

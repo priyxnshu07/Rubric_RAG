@@ -7,11 +7,14 @@ from pydantic import BaseModel, Field
 class Chunk(BaseModel):
     """One retrievable piece of a rubric or course notes."""
 
-    id: str  # e.g. "R7" (rubric line 7) or "N3-5" (notes lines 3-5)
+    id: str  # e.g. "R7" (rubric line 7), "R9-13" (rubric lines 9-13) or "N3-5" (notes lines 3-5)
     text: str
     doc_type: Literal["rubric", "notes"]
     start_line: int
     end_line: int
+    source: str = ""  # file the chunk came from
+    criterion: str = ""  # e.g. "Q1 Photosynthesis > Inputs"; empty for notes and general rubric text
+    points: float | None = None  # max points of the criterion, if stated
 
 
 class IngestRequest(BaseModel):
@@ -45,6 +48,8 @@ class Citation(BaseModel):
     text: str
     start_line: int
     end_line: int
+    source: str = ""
+    criterion: str = ""
 
 
 class GradeResponse(BaseModel):
